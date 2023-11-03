@@ -11,3 +11,7 @@ Practice repository for open source software
 
 * pyqt5 모듈 설치 (python -m pip install pyqt5)
 * 파이썬 파일 실행 (python calculator_main.py)
+
+## Reference
+
+* https://studyingrabbit.tistory.com/23
