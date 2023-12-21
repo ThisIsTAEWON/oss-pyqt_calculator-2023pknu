@@ -1,5 +1,7 @@
 import sys
 from PyQt5.QtWidgets import *
+import re
+import math
 
 class Main(QDialog):
     def __init__(self):
@@ -29,8 +31,8 @@ class Main(QDialog):
         button_percentage = QPushButton("%")
         
         button_reciprocal = QPushButton("1/x")
-        button_square = QPushButton("x^2")
-        button_root = QPushButton("x^(1/2)")
+        button_exp = QPushButton("x^2")
+        button_sqrt = QPushButton("x^(1/2)")
 
         ### 사칙연산 버튼을 클릭했을 때, 각 사칙연산 부호가 수식창에 추가될 수 있도록 시그널 설정
         button_plus.clicked.connect(lambda state, operation = "+": self.button_operation_clicked(operation))
@@ -39,9 +41,9 @@ class Main(QDialog):
         button_division.clicked.connect(lambda state, operation = "/": self.button_operation_clicked(operation))
         button_percentage.clicked.connect(lambda state, operation = "%": self.button_operation_clicked(operation))
         
-        button_reciprocal.clicked.connect(lambda state, operation = "1/x": self.button_operation_clicked(operation))
-        button_square.clicked.connect(lambda state, operation = "x^2": self.button_operation_clicked(operation))
-        button_root.clicked.connect(lambda state, operation = "x^(1/2)": self.button_operation_clicked(operation))
+        button_reciprocal.clicked.connect(lambda state, operation = "1/x": self.button_single_operation_clicked(operation))
+        button_exp.clicked.connect(lambda state, operation = "x^2": self.button_single_operation_clicked(operation))
+        button_sqrt.clicked.connect(lambda state, operation = "x^(1/2)": self.button_single_operation_clicked(operation))
 
         ### 사칙연산 버튼을 layout_operation 레이아웃에 추가
         layout.addWidget(button_plus, 4, 4)
@@ -51,8 +53,8 @@ class Main(QDialog):
         layout.addWidget(button_percentage, 0, 1)
         
         layout.addWidget(button_reciprocal, 1, 1)
-        layout.addWidget(button_square, 1, 2)
-        layout.addWidget(button_root, 1, 3)
+        layout.addWidget(button_exp, 1, 2)
+        layout.addWidget(button_sqrt, 1, 3)
 
         ### =, clear, backspace 버튼 생성
         button_equal = QPushButton("=")
@@ -118,16 +120,42 @@ class Main(QDialog):
 
     def button_operation_clicked(self, operation):
         equation = self.equation.text()
+        solution = eval(equation)
         equation += operation
         self.equation.setText(equation)
-        self.solution.setText(operation)
+        self.solution.setText(str(solution))
 
     def button_equal_clicked(self):
         equation = self.equation.text()
         solution = eval(equation)
         equation = eval(equation)
         self.solution.setText(str(solution))
+    
+    # 정규 표현식을 사용하여 숫자 또는 소수점으로 끝나는 부분을 추출
+    def extract_last_operand(self, expression):
+        match = re.search(r'\d+(\.\d+)?$', expression)
+        if match:
+            return match.group()
+        else:
+            return None
+    
+    def button_single_operation_clicked(self, operation):
+        equation = self.equation.text()
+        operand = self.extract_last_operand(equation)
+        if operand == None:
+            return
+        equation = equation.rstrip(operand)
         
+        if operation == "1/x":
+            equation = equation + str((1 / float(operand)))
+        elif operation == "x^2":
+            equation = equation + str(math.pow(float(operand), 2))
+        elif operation == "x^(1/2)":
+            equation = equation + str(math.sqrt(float(operand)))
+        
+        equation = eval(equation)
+        self.equation.setText(str(equation))
+        self.solution.setText(str(equation))
 
     def button_clear_clicked(self):
         self.equation.setText("")
