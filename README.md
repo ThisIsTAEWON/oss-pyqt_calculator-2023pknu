@@ -6,6 +6,11 @@ Practice repository for open source software
 * OSS github repository 생성 및 관리 실습
 * PyQt 기반 계산기 기능 및 사용방법 개선
 
+
+## 사용방법
+
+* Window 계산기와 동일한 기능입니다.
+
   
 ## Getting started
 
