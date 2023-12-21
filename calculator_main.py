@@ -19,9 +19,11 @@ class Main(QDialog):
         ### 수식 입력과 답 출력을 위한 LineEdit 위젯 생성
         self.equation = QLineEdit("")
         self.solution = QLineEdit("")
+        self.operand = QLineEdit("")
 
         ### layout_equation_solution 레이아웃에 수식, 답 위젯을 추가
         layout_equation_solution.addRow(self.solution)
+        self.button_C_clicked()
 
         ### 사칙연상 버튼 생성
         button_plus = QPushButton("+")
@@ -64,8 +66,8 @@ class Main(QDialog):
 
         ### =, clear, backspace 버튼 클릭 시 시그널 설정
         button_equal.clicked.connect(self.button_equal_clicked)
-        button_CE.clicked.connect(self.button_clear_clicked)
-        button_C.clicked.connect(self.button_clear_clicked)
+        button_CE.clicked.connect(self.button_CE_clicked)
+        button_C.clicked.connect(self.button_C_clicked)
         button_backspace.clicked.connect(self.button_backspace_clicked)
 
         ### =, clear, backspace 버튼을 layout_clear_equal 레이아웃에 추가
@@ -93,14 +95,10 @@ class Main(QDialog):
         layout.addWidget(number_button_dict[8], 2, 2)
         layout.addWidget(number_button_dict[9], 2, 3)
 
-        ### 소숫점 버튼과 00 버튼을 입력하고 시그널 설정
+        ### 소숫점 버튼을 입력하고 시그널 설정
         button_dot = QPushButton(".")
         button_dot.clicked.connect(lambda state, num = ".": self.number_button_clicked(num))
         layout.addWidget(button_dot, 5, 3)
-
-        # button_double_zero = QPushButton("00")
-        # button_double_zero.clicked.connect(lambda state, num = "00": self.number_button_clicked(num))
-        # layout.addWidget(button_double_zero, 0, 4)
 
         ### 각 레이아웃을 main_layout 레이아웃에 추가
         main_layout.addLayout(layout_equation_solution)
@@ -113,53 +111,58 @@ class Main(QDialog):
     ### functions ###
     #################
     def number_button_clicked(self, num):
-        equation = self.equation.text()
-        equation += str(num)
-        self.equation.setText(equation)
-        self.solution.setText(str(num))
+        operand = self.operand.text()
+        if operand == "0" or operand == "expression_terminate":
+            operand = ""
+        operand += str(num)
+        self.operand.setText(operand)
+        self.solution.setText(operand)
 
     def button_operation_clicked(self, operation):
         equation = self.equation.text()
+        if equation == "0":
+            equation = ""
+        operand = self.operand.text()
+        equation += operand
         solution = eval(equation)
         equation += operation
+        self.operand.setText("0")
         self.equation.setText(equation)
         self.solution.setText(str(solution))
 
     def button_equal_clicked(self):
         equation = self.equation.text()
+        if equation == "0":
+            equation = ""
+        equation += self.operand.text()
         solution = eval(equation)
-        equation = eval(equation)
+        self.operand.setText("0")
+        self.equation.setText("0")
         self.solution.setText(str(solution))
     
-    # 정규 표현식을 사용하여 숫자 또는 소수점으로 끝나는 부분을 추출
-    def extract_last_operand(self, expression):
-        match = re.search(r'\d+(\.\d+)?$', expression)
-        if match:
-            return match.group()
-        else:
-            return None
-    
     def button_single_operation_clicked(self, operation):
-        equation = self.equation.text()
-        operand = self.extract_last_operand(equation)
-        if operand == None:
-            return
-        equation = equation.rstrip(operand)
+        operand = self.operand.text()
         
         if operation == "1/x":
-            equation = equation + str((1 / float(operand)))
+            operand = 1 / float(operand)
         elif operation == "x^2":
-            equation = equation + str(math.pow(float(operand), 2))
+            operand = math.pow(float(operand), 2)
         elif operation == "x^(1/2)":
-            equation = equation + str(math.sqrt(float(operand)))
+            operand = math.sqrt(float(operand))
+        else:
+            return
         
-        equation = eval(equation)
-        self.equation.setText(str(equation))
-        self.solution.setText(str(equation))
+        self.operand.setText(str(operand))
+        self.solution.setText(str(operand))
 
-    def button_clear_clicked(self):
-        self.equation.setText("")
-        self.solution.setText("")
+    def button_C_clicked(self):
+        self.operand.setText("0")
+        self.equation.setText("0")
+        self.solution.setText("0")
+        
+    def button_CE_clicked(self):
+        self.operand.setText("0")
+        self.solution.setText("0")
 
     def button_backspace_clicked(self):
         equation = self.equation.text()
