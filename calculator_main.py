@@ -112,7 +112,7 @@ class Main(QDialog):
     #################
     def number_button_clicked(self, num):
         operand = self.operand.text()
-        if operand == "0" or operand == "expression_terminate":
+        if operand == "0":
             operand = ""
         operand += str(num)
         self.operand.setText(operand)
@@ -122,6 +122,7 @@ class Main(QDialog):
         equation = self.equation.text()
         if equation == "0":
             equation = ""
+        
         operand = self.operand.text()
         equation += operand
         solution = eval(equation)
@@ -133,6 +134,7 @@ class Main(QDialog):
     def button_equal_clicked(self):
         equation = self.equation.text()
         if equation == "0":
+            self.button_C_clicked()
             equation = ""
         equation += self.operand.text()
         solution = eval(equation)
@@ -142,6 +144,9 @@ class Main(QDialog):
     
     def button_single_operation_clicked(self, operation):
         operand = self.operand.text()
+        if operand == "0":
+            self.solution.setText("0")
+            return
         
         if operation == "1/x":
             operand = 1 / float(operand)
